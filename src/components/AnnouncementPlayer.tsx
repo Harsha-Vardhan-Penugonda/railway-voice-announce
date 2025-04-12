@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Volume2, VolumeX } from "lucide-react";
+import { Volume2, VolumeX, Radio } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 
@@ -14,22 +14,33 @@ interface AnnouncementPlayerProps {
 const AnnouncementPlayer = ({ isPlaying, announcementType }: AnnouncementPlayerProps) => {
   const [progress, setProgress] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
+  const [currentLanguage, setCurrentLanguage] = useState<'english' | 'hindi' | 'telugu'>('english');
 
   useEffect(() => {
     if (isPlaying) {
       setIsVisible(true);
       setProgress(0);
       
-      // Simulate progress update
+      // Simulate progress update and language transitions
+      const totalTime = 30000; // 30 seconds for the full announcement
       const interval = setInterval(() => {
         setProgress((prev) => {
-          if (prev >= 100) {
+          const newProgress = prev + (100 / (totalTime / 100));
+          
+          // Simulate language transitions
+          if (newProgress > 33 && newProgress <= 66 && currentLanguage !== 'hindi') {
+            setCurrentLanguage('hindi');
+          } else if (newProgress > 66 && currentLanguage !== 'telugu') {
+            setCurrentLanguage('telugu');
+          }
+          
+          if (newProgress >= 100) {
             clearInterval(interval);
             return 100;
           }
-          return prev + 1;
+          return newProgress;
         });
-      }, 150); // Adjust timing based on average announcement length
+      }, 100);
       
       return () => {
         clearInterval(interval);
@@ -37,12 +48,13 @@ const AnnouncementPlayer = ({ isPlaying, announcementType }: AnnouncementPlayerP
     } else if (progress === 100) {
       const timeout = setTimeout(() => {
         setIsVisible(false);
+        setCurrentLanguage('english'); // Reset for next time
       }, 2000);
       return () => {
         clearTimeout(timeout);
       };
     }
-  }, [isPlaying, progress]);
+  }, [isPlaying, progress, currentLanguage]);
 
   if (!isVisible) {
     return null;
@@ -60,7 +72,11 @@ const AnnouncementPlayer = ({ isPlaying, announcementType }: AnnouncementPlayerP
       <CardContent className="p-4">
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center">
-            <Volume2 className={isPlaying ? "animate-pulse text-railway-blue" : "text-gray-400"} size={20} />
+            {isPlaying ? (
+              <Radio className="animate-pulse text-railway-blue" size={20} />
+            ) : (
+              <VolumeX className="text-gray-400" size={20} />
+            )}
             <span className="ml-2 font-medium">
               {isPlaying ? (
                 <span className="text-railway-blue">Playing Announcement</span>
@@ -73,13 +89,59 @@ const AnnouncementPlayer = ({ isPlaying, announcementType }: AnnouncementPlayerP
             {announcementType.charAt(0).toUpperCase() + announcementType.slice(1)}
           </Badge>
         </div>
-        <Progress value={progress} className="h-1.5" />
-        <div className="flex justify-between mt-2 text-xs text-gray-500">
-          <span>EN → हिन्दी → తెలుగు</span>
-          <span>{progress}%</span>
+        
+        <div className="relative">
+          <Progress value={progress} className="h-2" />
+          <div className="absolute top-0 left-0 w-full flex justify-between mt-3">
+            <LanguageMarker 
+              lang="EN" 
+              position="left" 
+              isActive={currentLanguage === 'english'}
+            />
+            <LanguageMarker 
+              lang="हिन्दी" 
+              position="center" 
+              isActive={currentLanguage === 'hindi'}
+            />
+            <LanguageMarker 
+              lang="తెలుగు" 
+              position="right" 
+              isActive={currentLanguage === 'telugu'}
+            />
+          </div>
+        </div>
+        
+        <div className="flex justify-between mt-6 text-xs text-gray-500">
+          <span>
+            {currentLanguage === 'english' && "Now playing: English"}
+            {currentLanguage === 'hindi' && "Now playing: हिन्दी"}
+            {currentLanguage === 'telugu' && "Now playing: తెలుగు"}
+          </span>
+          <span>{progress.toFixed(0)}%</span>
         </div>
       </CardContent>
     </Card>
+  );
+};
+
+const LanguageMarker = ({ 
+  lang, 
+  position,
+  isActive 
+}: { 
+  lang: string; 
+  position: 'left' | 'center' | 'right';
+  isActive: boolean;
+}) => {
+  return (
+    <div className={cn(
+      "text-xs font-medium transition-colors duration-300",
+      position === 'left' ? "-translate-x-1/2" : "",
+      position === 'right' ? "translate-x-1/2" : "",
+      isActive ? "text-railway-blue" : "text-gray-400"
+    )}>
+      {lang}
+    </div>
   );
 };
 

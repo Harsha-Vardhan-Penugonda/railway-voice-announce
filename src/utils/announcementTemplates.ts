@@ -7,7 +7,7 @@ export const getAnnouncementTemplate = (type: AnnouncementType): AnnouncementTem
       return {
         english: "Attention please, train number [trainNumberFullstop] from [origin] to [destination], [trainName], is arriving shortly on platform number [platform].",
         hindi: "यात्रीगण कृपया ध्यान दें, गाड़ी संख्या [trainNumberFullstop], [origin] से [destination] जाने वाली [trainName], प्लेटफार्म क्रमांक [platform] पर थोड़ी देर में आएगी।",
-        telugu: "దయచేసి వినండి, రైలు నంబరు [trainNumberFullstop] [origin] నుండి [destination] వెళ్ళే [trainName] మరికొద్దిసేపట్లో నంబర్ [platform] ప్లాట్‌ఫామ్‌కు వచ్చును."
+        telugu: "దయచేసి వినండి, రైలు నంబర్ [trainNumberFullstop] [origin] నుండి [destination] వెళ్ళే [trainName] మరికొద్దిసేపట్లో నంబర్ [platform] ప్లాట్‌ఫామ్‌కు వచ్చును."
       };
     case 'departure':
       return {
@@ -19,7 +19,7 @@ export const getAnnouncementTemplate = (type: AnnouncementType): AnnouncementTem
       return {
         english: "We regret to inform that train number [trainNumberFullstop], [trainName], from [origin] to [destination] is delayed by [delayTime]. The expected arrival time is [updatedArrival]. Inconvenience caused is deeply regretted.",
         hindi: "हमें यह सूचित करते हुए खेद है कि गाड़ी संख्या [trainNumberFullstop], [trainName], [origin] से [destination] जाने वाली, [delayTime] देरी से चल रही है। अनुमानित आगमन समय [updatedArrival] है। असुविधा के लिए हमें खेद है।",
-        telugu: "రైలు నంబరు [trainNumberFullstop], [trainName], [origin] నుండి [destination] వెళ్ళే రైలు [delayTime] ఆలస్యంగా ఉన్నట్లు తెలియజేయడానికి చింతిస్తున్నాము. అంచనా రాక సమయం [updatedArrival]. కలిగిన అసౌకర్యానికి చింతిస్తున్నాము."
+        telugu: "రైలు నంబర్ [trainNumberFullstop], [trainName], [origin] నుండి [destination] వెళ్ళే రైలు [delayTime] ఆలస్యంగా ఉన్నట్లు తెలియజేయడానికి చింతిస్తున్నాము. అంచనా రాక సమయం [updatedArrival]. కలిగిన అసౌకర్యానికి చింతిస్తున్నాము."
       };
     default:
       return {
