@@ -1,5 +1,5 @@
 
-import { Language } from "@/types/announcement";
+import { Language, VoicePreference, AnnouncementTiming } from "@/types/announcement";
 
 // Mapping of languages to voice names for Web Speech API with Indian accent preference
 const languageVoiceMap: Record<Language, { lang: string, voiceNameIncludes: string }> = {
@@ -8,14 +8,31 @@ const languageVoiceMap: Record<Language, { lang: string, voiceNameIncludes: stri
   telugu: { lang: "te-IN", voiceNameIncludes: "female" }    // Telugu
 };
 
+// Default timing configuration for more natural-sounding announcements
+const defaultTiming: AnnouncementTiming = {
+  pauseAfterComma: 300,      // 300ms pause after commas
+  pauseAfterPeriod: 600,     // 600ms pause after periods
+  pauseBetweenLanguages: 1000, // 1s pause between languages
+  speechRate: 0.9            // slightly slower for clarity
+};
+
 // Helper to insert natural pauses in announcements
-const insertNaturalPauses = (text: string): string => {
-  // Add slight pauses after commas, periods, and specific separators
-  return text
-    .replace(/,/g, ', <break time="0.3s"/>')
-    .replace(/\./g, '. <break time="0.5s"/>')
-    .replace(/platform number/g, '<break time="0.2s"/> platform number')
-    .replace(/train number/g, '<break time="0.2s"/> train number');
+const insertNaturalPauses = (text: string, timing: AnnouncementTiming = defaultTiming): string => {
+  // Clean the text to make sure there are proper spaces after punctuation
+  let cleanedText = text
+    .replace(/,(?!\s)/g, ', ')  // Ensure space after comma
+    .replace(/\.(?!\s|$)/g, '. '); // Ensure space after period if not at end
+  
+  // Add pauses after punctuation for more natural speech rhythm
+  return cleanedText
+    .replace(/,\s/g, `, `)
+    .replace(/\.\s/g, `. `)
+    .replace(/(\d+)\.(\d+)/g, '$1 point $2') // Convert decimal points to "point" for better pronunciation
+    .replace(/platform number/gi, 'platform number ')
+    .replace(/train number/gi, 'train number ')
+    .replace(/प्लेटफार्म क्रमांक/g, 'प्लेटफार्म क्रमांक ')
+    .replace(/गाड़ी संख्या/g, 'गाड़ी संख्या ')
+    .replace(/నంబర్/g, 'నంబర్ ');
 };
 
 // Find the best matching voice based on language and gender preference
@@ -82,7 +99,7 @@ const executeSpeech = (
   utterance.lang = languageVoiceMap[language].lang;
   
   // Adjust speech parameters for more natural sound
-  utterance.rate = 0.9; // Slightly slower for clarity
+  utterance.rate = defaultTiming.speechRate; // Slightly slower for clarity
   utterance.pitch = 1;
   
   // Set callbacks
@@ -133,14 +150,14 @@ export const playMultilingualAnnouncement = (
                 undefined,
                 () => {
                   if (onEnd) {
-                    setTimeout(() => onEnd(), 500); // Final pause before completion
+                    setTimeout(() => onEnd(), defaultTiming.pauseBetweenLanguages); // Final pause before completion
                   }
                 }
               );
-            }, 800); // Longer pause between languages
+            }, defaultTiming.pauseBetweenLanguages); // Longer pause between languages
           }
         );
-      }, 800);
+      }, defaultTiming.pauseBetweenLanguages);
     }
   );
 };
