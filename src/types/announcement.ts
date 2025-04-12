@@ -26,3 +26,18 @@ export interface AnnouncementTemplate {
   hindi: string;
   telugu: string;
 }
+
+// Voice preferences
+export interface VoicePreference {
+  lang: string;
+  gender?: 'female' | 'male';
+  name?: string;
+}
+
+// Announcement timing configuration
+export interface AnnouncementTiming {
+  pauseAfterComma: number; // milliseconds
+  pauseAfterPeriod: number; // milliseconds
+  pauseBetweenLanguages: number; // milliseconds
+  speechRate: number; // 0.1 to 10
+}

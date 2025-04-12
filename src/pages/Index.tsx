@@ -7,6 +7,7 @@ import AnnouncementPlayer from "@/components/AnnouncementPlayer";
 import { AnnouncementType, TrainInfo, Announcement } from "@/types/announcement";
 import { v4 as uuidv4 } from "uuid";
 import { playMultilingualAnnouncement } from "@/utils/textToSpeech";
+import { generateAnnouncementText } from "@/utils/announcementTemplates";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 
@@ -20,8 +21,7 @@ const Index = () => {
 
   const handleAnnouncementCreate = useCallback((
     type: AnnouncementType,
-    trainInfo: TrainInfo,
-    announcementTexts: { english: string; hindi: string; telugu: string }
+    trainInfo: TrainInfo
   ) => {
     const id = uuidv4();
     const newAnnouncement: Announcement = {
@@ -35,6 +35,17 @@ const Index = () => {
     setAnnouncements((prev) => [newAnnouncement, ...prev]);
     setCurrentAnnouncement({ id, type, isPlaying: true });
 
+    // Generate announcement texts using templates
+    const announcementTexts = {
+      english: generateAnnouncementText(type, trainInfo, 'english'),
+      hindi: generateAnnouncementText(type, trainInfo, 'hindi'),
+      telugu: generateAnnouncementText(type, trainInfo, 'telugu'),
+    };
+
+    toast.info("Now playing announcement...", {
+      duration: 3000
+    });
+
     playMultilingualAnnouncement(
       announcementTexts,
       undefined,
@@ -45,6 +56,7 @@ const Index = () => {
         setCurrentAnnouncement((prev) => 
           prev?.id === id ? { ...prev, isPlaying: false } : prev
         );
+        toast.success("Announcement completed");
       }
     );
   }, []);
@@ -63,27 +75,17 @@ const Index = () => {
       isPlaying: true 
     });
 
-    // Generate texts
+    // Generate texts from templates
     const { type, trainInfo } = announcement;
     const announcementTexts = {
-      english: type === 'arrival' 
-        ? `Train ${trainInfo.trainNumber} ${trainInfo.trainName} from ${trainInfo.origin} to ${trainInfo.destination} is arriving on Platform ${trainInfo.platform}.`
-        : type === 'departure'
-        ? `Train ${trainInfo.trainNumber} ${trainInfo.trainName} to ${trainInfo.destination} will depart from Platform ${trainInfo.platform} shortly.`
-        : `Attention please, Train ${trainInfo.trainNumber} ${trainInfo.trainName} is delayed by ${trainInfo.delayTime}. The updated arrival time is ${trainInfo.updatedArrival}.`,
-      hindi: type === 'arrival'
-        ? `ट्रेन ${trainInfo.trainNumber} ${trainInfo.trainName} ${trainInfo.origin} से ${trainInfo.destination} तक प्लेटफ़ॉर्म ${trainInfo.platform} पर पहुंच रही है।`
-        : type === 'departure'
-        ? `ट्रेन ${trainInfo.trainNumber} ${trainInfo.trainName} ${trainInfo.destination} के लिए प्लेटफ़ॉर्म ${trainInfo.platform} से कुछ ही समय में प्रस्थान करेगी।`
-        : `कृपया ध्यान दें, ट्रेन ${trainInfo.trainNumber} ${trainInfo.trainName} ${trainInfo.delayTime} से देरी हो रही है। अद्यतन आगमन समय ${trainInfo.updatedArrival} है।`,
-      telugu: type === 'arrival'
-        ? `రైలు ${trainInfo.trainNumber} ${trainInfo.trainName} ${trainInfo.origin} నుండి ${trainInfo.destination} వరకు ప్లాట్‌ఫారం ${trainInfo.platform} పై రాబోతోంది.`
-        : type === 'departure'
-        ? `రైలు ${trainInfo.trainNumber} ${trainInfo.trainName} ${trainInfo.destination} కి ప్లాట్‌ఫారం ${trainInfo.platform} నుండి త్వరలో బయలుదేరబోతుంది.`
-        : `దయచేసి శ్రద్ధ వహించండి, రైలు ${trainInfo.trainNumber} ${trainInfo.trainName} ${trainInfo.delayTime} ఆలస్యంగా ఉంది. నవీకరించబడిన రాక సమయం ${trainInfo.updatedArrival}.`,
+      english: generateAnnouncementText(type, trainInfo, 'english'),
+      hindi: generateAnnouncementText(type, trainInfo, 'hindi'),
+      telugu: generateAnnouncementText(type, trainInfo, 'telugu'),
     };
 
-    toast.info("Playing announcement...");
+    toast.info("Replaying announcement...", {
+      duration: 3000
+    });
 
     // Play the announcement
     playMultilingualAnnouncement(
@@ -102,18 +104,28 @@ const Index = () => {
   }, [announcements]);
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-blue-50 flex flex-col">
       <Header />
-      <main className="flex-1 container py-6 px-4">
+      <main className="flex-1 container py-8 px-4">
+        <div className="mb-6">
+          <h2 className="text-lg text-center text-gray-600 font-medium">
+            Indian Railways Platform Announcement System
+          </h2>
+          <div className="w-40 h-1 bg-railway-yellow mx-auto mt-2 rounded-full"></div>
+        </div>
         <Tabs defaultValue="create" className="w-full">
-          <TabsList className="mb-6">
-            <TabsTrigger value="create">Create Announcement</TabsTrigger>
-            <TabsTrigger value="history">Recent Announcements ({announcements.length})</TabsTrigger>
+          <TabsList className="mb-6 bg-blue-100 p-1">
+            <TabsTrigger value="create" className="data-[state=active]:bg-railway-blue data-[state=active]:text-white">
+              Create Announcement
+            </TabsTrigger>
+            <TabsTrigger value="history" className="data-[state=active]:bg-railway-blue data-[state=active]:text-white">
+              Recent Announcements ({announcements.length})
+            </TabsTrigger>
           </TabsList>
-          <TabsContent value="create">
+          <TabsContent value="create" className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
             <AnnouncementForm onAnnouncementCreate={handleAnnouncementCreate} />
           </TabsContent>
-          <TabsContent value="history">
+          <TabsContent value="history" className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
             <AnnouncementHistory 
               announcements={announcements} 
               onPlay={handlePlayAnnouncement} 

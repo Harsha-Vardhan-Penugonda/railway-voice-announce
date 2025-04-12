@@ -5,21 +5,21 @@ export const getAnnouncementTemplate = (type: AnnouncementType): AnnouncementTem
   switch (type) {
     case 'arrival':
       return {
-        english: "Train [trainNumber] [trainName] from [origin] to [destination] is arriving on Platform [platform].",
-        hindi: "ट्रेन [trainNumber] [trainName] [origin] से [destination] तक प्लेटफ़ॉर्म [platform] पर पहुंच रही है।",
-        telugu: "రైలు [trainNumber] [trainName] [origin] నుండి [destination] వరకు ప్లాట్‌ఫారం [platform] పై రాబోతోంది."
+        english: "Attention please, train number [trainNumberFullstop] from [origin] to [destination], [trainName], is arriving shortly on platform number [platform].",
+        hindi: "यात्रीगण कृपया ध्यान दें, गाड़ी संख्या [trainNumberFullstop], [origin] से [destination] जाने वाली [trainName], प्लेटफार्म क्रमांक [platform] पर थोड़ी देर में आएगी।",
+        telugu: "దయచేసి వినండి, రైలు నంబరు [trainNumberFullstop] [origin] నుండి [destination] వెళ్ళే [trainName] మరికొద్దిసేపట్లో నంబర్ [platform] ప్లాట్‌ఫామ్‌కు వచ్చును."
       };
     case 'departure':
       return {
-        english: "Train [trainNumber] [trainName] to [destination] will depart from Platform [platform] shortly.",
-        hindi: "ट्रेन [trainNumber] [trainName] [destination] के लिए प्लेटफ़ॉर्म [platform] से कुछ ही समय में प्रस्थान करेगी।",
-        telugu: "రైలు [trainNumber] [trainName] [destination] కి ప్లాట్‌ఫారం [platform] నుండి త్వరలో బయలుదేరబోతుంది."
+        english: "Attention please, train number [trainNumberFullstop], [trainName], for [destination] is ready to depart from platform number [platform]. Passengers are requested to board the train.",
+        hindi: "यात्रीगण कृपया ध्यान दें, गाड़ी संख्या [trainNumberFullstop], [trainName], [destination] के लिए प्लेटफार्म क्रमांक [platform] से प्रस्थान के लिए तैयार है। यात्रियों से अनुरोध है कि वे गाड़ी में सवार हो जाएं।",
+        telugu: "దయచేసి వినండి, రైలు నంబరు [trainNumberFullstop], [trainName], [destination] కు వెళ్ళే రైలు ప్లాట్‌ఫారమ్ నంబర్ [platform] నుండి నిష్క్రమించడానికి సిద్ధంగా ఉంది. ప్రయాణికులు రైలు ఎక్కవలసిందిగా కోరడమైనది."
       };
     case 'delay':
       return {
-        english: "Attention please, Train [trainNumber] [trainName] is delayed by [delayTime]. The updated arrival time is [updatedArrival].",
-        hindi: "कृपया ध्यान दें, ट्रेन [trainNumber] [trainName] [delayTime] से देरी हो रही है। अद्यतन आगमन समय [updatedArrival] है।",
-        telugu: "దయచేసి శ్రద్ధ వహించండి, రైలు [trainNumber] [trainName] [delayTime] ఆలస్యంగా ఉంది. నవీకరించబడిన రాక సమయం [updatedArrival]."
+        english: "We regret to inform that train number [trainNumberFullstop], [trainName], from [origin] to [destination] is delayed by [delayTime]. The expected arrival time is [updatedArrival]. Inconvenience caused is deeply regretted.",
+        hindi: "हमें यह सूचित करते हुए खेद है कि गाड़ी संख्या [trainNumberFullstop], [trainName], [origin] से [destination] जाने वाली, [delayTime] देरी से चल रही है। अनुमानित आगमन समय [updatedArrival] है। असुविधा के लिए हमें खेद है।",
+        telugu: "రైలు నంబరు [trainNumberFullstop], [trainName], [origin] నుండి [destination] వెళ్ళే రైలు [delayTime] ఆలస్యంగా ఉన్నట్లు తెలియజేయడానికి చింతిస్తున్నాము. అంచనా రాక సమయం [updatedArrival]. కలిగిన అసౌకర్యానికి చింతిస్తున్నాము."
       };
     default:
       return {
@@ -30,6 +30,10 @@ export const getAnnouncementTemplate = (type: AnnouncementType): AnnouncementTem
   }
 };
 
+const formatTrainNumberWithFullstops = (trainNumber: string): string => {
+  return trainNumber.split('').join('.');
+};
+
 export const generateAnnouncementText = (
   type: AnnouncementType,
   trainInfo: TrainInfo,
@@ -37,7 +41,11 @@ export const generateAnnouncementText = (
 ): string => {
   const template = getAnnouncementTemplate(type)[language];
   
+  // Format train number with fullstops (e.g., "12345" becomes "1.2.3.4.5")
+  const trainNumberFullstop = formatTrainNumberWithFullstops(trainInfo.trainNumber);
+  
   let text = template
+    .replace('[trainNumberFullstop]', trainNumberFullstop)
     .replace('[trainNumber]', trainInfo.trainNumber)
     .replace('[trainName]', trainInfo.trainName)
     .replace('[origin]', trainInfo.origin)
